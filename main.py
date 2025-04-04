@@ -216,9 +216,13 @@ def do_the_things(directory_input: str):
         print(directory_output, "\n")
 
 
-### __main__
-if __name__ == "__main__":
+def start():
     if len(sys.argv) != 2:
         print("Usage: python script.py directory_path")
     else:
         do_the_things(sys.argv[1])
+
+
+### __main__
+if __name__ == "__main__":
+    start()
