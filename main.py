@@ -66,18 +66,28 @@ def transform(parsed_xml, xslt_path: str, html_path: str):
 
 def get_3gp_base64_from_xml(parsed_xml):
     # Find the "part" element with ct="video/3gpp"
+    nulls: int = 0
     for part in parsed_xml.iter("part"):
         if part.get("ct") == "video/3gpp":
+            filename = part.get("cl")
+            if filename == "null":
+                nulls += 1
+                filename = f"""unnamed_3gp_{nulls:03d}.3gp"""
             # Return the "cl" (filename) and "data" attributes as a tuple
-            yield (part.get("cl"), part.get("data"))
+            yield (filename, part.get("data"))
 
 
 def get_mp4_base64_from_xml(parsed_xml):
-    # Find the "part" element with ct="video/3gpp"
+    # Find the "part" element with ct="video/mp4"
+    nulls: int = 0
     for part in parsed_xml.iter("part"):
         if part.get("ct") == "video/mp4":
+            filename = part.get("cl")
+            if filename == "null":
+                nulls += 1
+                filename = f"""unnamed_mp4_{nulls:03d}.mp4"""
             # Return the "cl" (filename) and "data" attributes as a tuple
-            yield (part.get("cl"), part.get("data"))
+            yield (filename, part.get("data"))
 
 
 ### functions: videos
