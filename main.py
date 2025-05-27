@@ -5,6 +5,7 @@ import sys
 from datetime import datetime
 
 import pdfkit
+from just_heic import convert_file as convert_heic
 from lxml import etree
 
 ### functions: filesystem
@@ -49,6 +50,51 @@ def parse_huge_xml(xml_path):
     return etree.parse(xml_path, parser)
 
 
+def rename_null_mms_data(parsed_xml):
+    null_counter: int = 0
+    for part in parsed_xml.iter("part"):
+        content_type = part.get("ct")
+
+        match content_type:
+            case "video/mp4":
+                extension = "mp4"
+            case "video/3gpp":
+                extension = "3gp"
+            case "image/heic":
+                extension = "heic"
+            case _:
+                extension = None
+
+        if extension:
+            file_name = part.get("cl")
+            if file_name == "null":
+                null_counter += 1
+                file_name = f"""unnamed_{null_counter:03d}.{extension}"""
+                part.set("cl", file_name)
+
+    return parsed_xml
+
+
+def remove_mms_text(parsed_xml):
+    # Collect elements to remove to avoid modifying tree while iterating
+    mms_to_remove = []
+
+    for mms in parsed_xml.iter("mms"):
+        parts = mms.find("parts")
+        if parts is not None:
+            part = parts.find("part")
+            if part is not None and (part.get("ct") == "" or part.get("ct") == "text/plain"):
+                mms_to_remove.append(mms)
+
+    # Remove collected elements
+    for mms in mms_to_remove:
+        parent = mms.getparent()
+        if parent is not None:
+            parent.remove(mms)
+
+    return parsed_xml
+
+
 def transform(parsed_xml, xslt_path: str, html_path: str):
     # Parse XSLT file
     xslt = etree.parse(xslt_path)
@@ -64,30 +110,25 @@ def transform(parsed_xml, xslt_path: str, html_path: str):
         f.write(str(result))
 
 
-def get_3gp_base64_from_xml(parsed_xml):
-    # Find the "part" element with ct="video/3gpp"
-    nulls: int = 0
+def get_mms_data_from_xml(parsed_xml, content_type: str):
     for part in parsed_xml.iter("part"):
-        if part.get("ct") == "video/3gpp":
-            filename = part.get("cl")
-            if filename == "null":
-                nulls += 1
-                filename = f"""unnamed_3gp_{nulls:03d}.3gp"""
+        if part.get("ct") == content_type:
             # Return the "cl" (filename) and "data" attributes as a tuple
-            yield (filename, part.get("data"))
+            yield (part.get("cl"), part.get("data"))
 
 
-def get_mp4_base64_from_xml(parsed_xml):
-    # Find the "part" element with ct="video/mp4"
-    nulls: int = 0
-    for part in parsed_xml.iter("part"):
-        if part.get("ct") == "video/mp4":
-            filename = part.get("cl")
-            if filename == "null":
-                nulls += 1
-                filename = f"""unnamed_mp4_{nulls:03d}.mp4"""
-            # Return the "cl" (filename) and "data" attributes as a tuple
-            yield (filename, part.get("data"))
+### functions: heic
+
+
+def convert_heic_to_jpg(filename_heic: str, base64_heic: str, output_directory: str):
+    filepath_heic = output_directory + filename_heic
+    filepath_jpg = output_directory + filename_heic + ".jpg"
+
+    # Decode the base64 .heic file
+    with open(filepath_heic, "wb") as f:
+        f.write(base64.b64decode(base64_heic))
+
+    convert_heic(filepath_heic, filepath_jpg)
 
 
 ### functions: videos
@@ -131,7 +172,7 @@ def convert_3gp_to_mp4(filename_3gp: str, base64_3gp: str, output_directory: str
             "-ss",
             "00:00:00",
             "-update",
-            "true",
+            "1",
             filepath_image,
         ]
     )
@@ -164,7 +205,7 @@ def extract_mp4(filename_mp4: str, base64_mp4: str, output_directory: str):
             "-ss",
             "00:00:00",
             "-update",
-            "true",
+            "1",
             filepath_image,
         ]
     )
@@ -203,14 +244,20 @@ def do_the_things(directory_input: str):
 
         print("", datetime.now().strftime("%H:%M:%S"), "Parsing file")
         xml = parse_huge_xml(directory_input + "\\" + file + ".xml")
+        xml = remove_mms_text(xml)
+        xml = rename_null_mms_data(xml)
+
+        print("", datetime.now().strftime("%H:%M:%S"), "Extracting photos: heic")
+        for content in get_mms_data_from_xml(xml, "image/heic"):
+            convert_heic_to_jpg(*content, directory_output)
 
         print("", datetime.now().strftime("%H:%M:%S"), "Converting videos: 3gp")
-        for video in get_3gp_base64_from_xml(xml):
-            convert_3gp_to_mp4(*video, directory_output)
+        for content in get_mms_data_from_xml(xml, "video/3gpp"):
+            convert_3gp_to_mp4(*content, directory_output)
 
         print("", datetime.now().strftime("%H:%M:%S"), "Extracting videos: mp4")
-        for video in get_mp4_base64_from_xml(xml):
-            extract_mp4(*video, directory_output)
+        for content in get_mms_data_from_xml(xml, "video/mp4"):
+            extract_mp4(*content, directory_output)
 
         print("", datetime.now().strftime("%H:%M:%S"), "Converting xml to html")
         transform(

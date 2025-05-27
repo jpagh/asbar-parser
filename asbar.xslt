@@ -20,7 +20,7 @@ body{ font-family: Arial-Emoji, Arial, Helvetica, sans-serif; }
 
   <body>
     <p align="center" style="word-break:break-all;word-wrap:break-word"><font style="font-size:40px;font-family:Arial;color:#4D4D4D;">Messages</font></p>
-    
+
     <div class="messages">
 
     <p>To: <xsl:value-of select="smses/sms/@contact_name"/> (<xsl:value-of select="smses/sms/@address"/>)</p>
@@ -42,7 +42,7 @@ body{ font-family: Arial-Emoji, Arial, Helvetica, sans-serif; }
           </p>
         </xsl:if>
 
-        <xsl:if test="@msg_box=1 or @msg_box=2">          
+        <xsl:if test="@msg_box=1 or @msg_box=2">
           <p>
             <xsl:attribute name="class">
               <xsl:if test="@msg_box=1">messages-cen</xsl:if>
@@ -50,11 +50,27 @@ body{ font-family: Arial-Emoji, Arial, Helvetica, sans-serif; }
             </xsl:attribute>
 
             <xsl:for-each select="parts/part">
-            
+
               <xsl:if test="@seq=0 and @ct='image/jpeg'">
                 <img width="400" align="middle">
                   <xsl:attribute name="src">
                     <xsl:value-of select="concat('data:',@ct,';base64,',@data)"/>
+                  </xsl:attribute>
+                </img>
+              </xsl:if>
+
+              <xsl:if test="@seq=0 and @ct='image/png'">
+                <img width="400" align="middle">
+                  <xsl:attribute name="src">
+                    <xsl:value-of select="concat('data:',@ct,';base64,',@data)"/>
+                  </xsl:attribute>
+                </img>
+              </xsl:if>
+
+              <xsl:if test="@seq=0 and @ct='image/heic'">
+                <img width="400" align="middle">
+                  <xsl:attribute name="src">
+                    <xsl:value-of select="concat(@cl,'.jpg')"/>
                   </xsl:attribute>
                 </img>
               </xsl:if>
@@ -98,7 +114,7 @@ body{ font-family: Arial-Emoji, Arial, Helvetica, sans-serif; }
               </xsl:if>
 
             </xsl:for-each>
-            
+
           </p>
         </xsl:if>
       </xsl:for-each>
