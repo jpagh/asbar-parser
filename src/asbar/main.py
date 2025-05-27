@@ -4,9 +4,9 @@ import subprocess
 import sys
 from datetime import datetime
 
-import pdfkit
 from just_heic import convert_file as convert_heic
 from lxml import etree
+from playwright.sync_api import sync_playwright
 
 ### functions: filesystem
 
@@ -79,23 +79,41 @@ def remove_mms_text(parsed_xml):
     # Collect elements to remove to avoid modifying tree while iterating
     mms_to_remove = []
 
+    # First, collect all SMS text messages for comparison
+    sms_texts = set()
+    for sms in parsed_xml.iter("sms"):
+        body = sms.get("body")
+        if body and body.strip():
+            # Normalize text: strip whitespace and normalize line endings
+            normalized_text = ' '.join(body.strip().split())
+            sms_texts.add(normalized_text)
+
     for mms in parsed_xml.iter("mms"):
         parts = mms.find("parts")
-        if parts is not None:
-            # Check if all parts are either SMIL or text/plain (no media content)
+        if parts is not None:            # Check if all parts are either SMIL or text content (no media content)
             is_text_only = True
+            mms_text_content = ""
+            
             for part in parts.findall("part"):
                 ct = part.get("ct")
-                # Allow SMIL (layout) and text/plain, but any other content type means it has media
+                text = part.get("text")
+                
+                # Check if this part contains text content (but ignore SMIL layout)
+                if text and text.strip() and ct != "application/smil":
+                    # This part has actual message text content, so collect it
+                    mms_text_content += text.strip() + " "
+                
+                # Check for media content types
                 if ct and ct not in ("application/smil", "text/plain", ""):
                     is_text_only = False
-                    break
-            
-            # If all parts are text-only (SMIL + text), remove this MMS
-            if is_text_only:
-                mms_to_remove.append(mms)
-
-    # Remove collected elements
+                    break            # If all parts are text-only (SMIL + text), check if there's a matching SMS
+            if is_text_only and mms_text_content.strip():
+                # Normalize MMS text the same way as SMS text
+                normalized_mms_text = ' '.join(mms_text_content.strip().split())
+                
+                # Only remove if there's a matching SMS with the same text content
+                if normalized_mms_text in sms_texts:
+                    mms_to_remove.append(mms)    # Remove collected elements
     for mms in mms_to_remove:
         parent = mms.getparent()
         if parent is not None:
@@ -117,6 +135,8 @@ def transform(parsed_xml, xslt_path: str, html_path: str):
     # Write the result to an HTML file
     with open(html_path, "w", encoding="utf-8") as f:
         f.write(str(result))
+
+    return result
 
 
 def get_mms_data_from_xml(parsed_xml, content_type: str):
@@ -223,19 +243,21 @@ def extract_mp4(filename_mp4: str, base64_mp4: str, output_directory: str):
 ### functions: pdf
 
 
-def html_to_pdf(html_path: str, pdf_path: str):
-    # Define options for pdfkit configuration
-    options = {
-        "enable-local-file-access": "",
-        "footer-right": "[page]",
-        "footer-font-size": "10",
-    }
-
-    # Create a pdfkit configuration with the path to wkhtmltopdf
-    config = pdfkit.configuration(wkhtmltopdf=r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe")
-
-    # Convert the HTML file to PDF
-    pdfkit.from_file(html_path, pdf_path, options=options, configuration=config)
+def html_to_pdf(html_path, output_path):
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page()
+        page.goto(f"file:///{html_path.replace('\\', '/')}", wait_until="networkidle", timeout=60000)
+        page.pdf(
+            path=output_path,
+            format="Letter",
+            margin={"top": "0.5in", "right": "0.5in", "bottom": "0.5in", "left": "0.5in"},
+            print_background=True,
+            display_header_footer=True,
+            header_template="""<div></div>""",
+            footer_template="""<div style="font-size: 10px; text-align: right; width: 100%; margin-right: 1cm;">pg <span class="pageNumber"></span>/<span class="totalPages"></span></div>""",
+        )
+        browser.close()
 
 
 ### functions: do the things
@@ -256,7 +278,7 @@ def do_the_things(directory_input: str):
         xml = remove_mms_text(xml)
         xml = rename_null_mms_data(xml)
 
-        print("", datetime.now().strftime("%H:%M:%S"), "Extracting photos: heic")
+        print("", datetime.now().strftime("%H:%M:%S"), "Converting images: heic")
         for content in get_mms_data_from_xml(xml, "image/heic"):
             convert_heic_to_jpg(*content, directory_output)
 
@@ -276,7 +298,8 @@ def do_the_things(directory_input: str):
         )
 
         print("", datetime.now().strftime("%H:%M:%S"), "Converting html to pdf")
-        html_to_pdf(directory_output + file + ".html", directory_output + file + ".pdf")
+        html_to_pdf(directory_output + file + ".html", directory_output + file + ".pdf")  # pdfkit
+        # html_to_pdf(directory_output + file + ".html", directory_output + file + ".pdf") #pdfkit
 
         print("", datetime.now().strftime("%H:%M:%S"), "All done")
         print(directory_output, "\n")
