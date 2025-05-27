@@ -6,6 +6,10 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 <head>
 <title>Messages</title>
 <style>
+@font-face {
+    font-family: 'Arial-Emoji';
+    src: url('Arial-Emoji.ttf') format('truetype');
+}
 body{ font-family: Arial-Emoji, Arial, Helvetica, sans-serif; }
 .messages{ width:800px; margin:auto;}
 .date{ text-align:center; color:#b3b3b3;}

@@ -15,4 +15,4 @@ dependencies = [
 asbar = "main:start"
 
 [tool.setuptools.package-data]
-"*" = ["*.xslt"]
+"*" = ["*.xslt", ".ttf"]

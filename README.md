@@ -12,6 +12,8 @@ This Python script requires the following font, programs, and modules:
     - `"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"`
  - ffmpeg.exe
     - `"C:\Program Files\ffmpeg\bin\ffmpeg.exe"`
+ - just-heic
+    - `pip install just-heic`
  - lxml
     - `pip install lxml`
  - pdfkit
@@ -19,5 +21,5 @@ This Python script requires the following font, programs, and modules:
 
 ## Usage
 ```bash
-python xsltproc.py "input/directory"
+asbar "input/directory"
 ```

@@ -82,8 +82,17 @@ def remove_mms_text(parsed_xml):
     for mms in parsed_xml.iter("mms"):
         parts = mms.find("parts")
         if parts is not None:
-            part = parts.find("part")
-            if part is not None and (part.get("ct") == "" or part.get("ct") == "text/plain"):
+            # Check if all parts are either SMIL or text/plain (no media content)
+            is_text_only = True
+            for part in parts.findall("part"):
+                ct = part.get("ct")
+                # Allow SMIL (layout) and text/plain, but any other content type means it has media
+                if ct and ct not in ("application/smil", "text/plain", ""):
+                    is_text_only = False
+                    break
+            
+            # If all parts are text-only (SMIL + text), remove this MMS
+            if is_text_only:
                 mms_to_remove.append(mms)
 
     # Remove collected elements
@@ -262,7 +271,7 @@ def do_the_things(directory_input: str):
         print("", datetime.now().strftime("%H:%M:%S"), "Converting xml to html")
         transform(
             xml,
-            script_path() + "asbar.xslt",
+            script_path() + "__assets__/asbar.xslt",
             directory_output + file + ".html",
         )
 
