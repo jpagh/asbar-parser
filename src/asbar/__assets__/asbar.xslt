@@ -6,19 +6,97 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 <head>
 <title>Messages</title>
 <style>
-@font-face {
-    font-family: 'Arial-Emoji';
-    src: url('Arial-Emoji.ttf') format('truetype');
-}
-body{ font-family: Arial-Emoji, Arial, Helvetica, sans-serif; }
-.messages{ width:800px; margin:auto;}
-.date{ text-align:center; color:#b3b3b3;}
-.messages-cen{     width:50%; padding:20px; display:block;                                background-color:#f2f2f2;                border-radius:20px 20px 20px 0px; margin-bottom:25px; word-wrap:break-word}
-.messages-cen2{    width:50%; padding:20px; display:block; position:relative; left:210px; background-color:#d2f6cb;                border-radius:20px 20px 0px 20px; margin-bottom:25px; word-wrap:break-word}
-.messages-cen3{    width:50%; padding:20px; display:block; position:relative; left:350px; background-color:#5babfe;                border-radius:20px 20px 0px 20px; margin-bottom:25px; word-wrap:break-word}
-.del-messages-cen{ width:50%; padding:20px; display:block;                                background-color:#f2f2f2; color:#ff0000; border-radius:20px 20px 20px 0px; margin-bottom:25px; word-wrap:break-word}
-.del-messages-cen2{width:50%; padding:20px; display:block; position:relative; left:210px; background-color:#d2f6cb; color:#ff0000; border-radius:20px 20px 0px 20px; margin-bottom:25px; word-wrap:break-word}
-.del-messages-cen3{width:50%; padding:20px; display:block; position:relative; left:210px; background-color:#5babfe; color:#ff0000; border-radius:20px 20px 0px 20px; margin-bottom:25px; word-wrap:break-word}
+    @font-face {
+        font-family: 'Arial-Emoji';
+        src: url('Arial-Emoji.ttf') format('truetype');
+    }
+
+    body {
+        font-family: Arial-Emoji, Arial, Helvetica, sans-serif;
+        font-size: small;
+    }
+
+    .messages {
+        width: 800px;
+        margin: auto;
+    }
+
+    .date {
+        text-align: center;
+        color: #b3b3b3;
+    }
+
+    .messages-cen {
+        width: 50%;
+        padding: 20px;
+        display: block;
+        background-color: #f2f2f2;
+        border-radius: 20px 20px 20px 0px;
+        margin-bottom: 25px;
+        word-wrap: break-word
+    }
+
+    .messages-cen2 {
+        width: 50%;
+        padding: 20px;
+        display: block;
+        position: relative;
+        left: 210px;
+        background-color: #d2f6cb;
+        border-radius: 20px 20px 0px 20px;
+        margin-bottom: 25px;
+        word-wrap: break-word
+    }
+
+    .messages-cen3 {
+        color: #ffffff;
+        width: 50%;
+        padding: 20px;
+        display: block;
+        position: relative;
+        left: 350px;
+        background-color: #0078fe;
+        border-radius: 20px 20px 0px 20px;
+        margin-bottom: 25px;
+        word-wrap: break-word
+    }
+
+    .del-messages-cen {
+        width: 50%;
+        padding: 20px;
+        display: block;
+        background-color: #f2f2f2;
+        color: #ff0000;
+        border-radius: 20px 20px 20px 0px;
+        margin-bottom: 25px;
+        word-wrap: break-word
+    }
+
+    .del-messages-cen2 {
+        width: 50%;
+        padding: 20px;
+        display: block;
+        position: relative;
+        left: 210px;
+        background-color: #d2f6cb;
+        color: #ff0000;
+        border-radius: 20px 20px 0px 20px;
+        margin-bottom: 25px;
+        word-wrap: break-word
+    }
+
+    .del-messages-cen3 {
+        width: 50%;
+        padding: 20px;
+        display: block;
+        position: relative;
+        left: 210px;
+        background-color: #0078fe;
+        color: #ff0000;
+        border-radius: 20px 20px 0px 20px;
+        margin-bottom: 25px;
+        word-wrap: break-word
+    }
 </style>
 </head>
 
