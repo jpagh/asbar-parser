@@ -125,7 +125,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
         </xsl:if>
 
         <xsl:if test="@msg_box=1 or @msg_box=2">
-          <p>
+          <p style="text-align: center;">
             <xsl:attribute name="class">
               <xsl:if test="@msg_box=1">messages-cen</xsl:if>
               <xsl:if test="@msg_box=2">messages-cen3</xsl:if>
@@ -134,7 +134,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
             <xsl:for-each select="parts/part">
 
               <xsl:if test="@seq=0 and @ct='image/jpeg'">
-                <img width="400" align="middle">
+                <img style="max-width:400px; max-height:450px" align="middle" type="image/jpg">
                   <xsl:attribute name="src">
                     <xsl:value-of select="concat('data:',@ct,';base64,',@data)"/>
                   </xsl:attribute>
@@ -142,7 +142,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
               </xsl:if>
 
               <xsl:if test="@seq=0 and @ct='image/png'">
-                <img width="400" align="middle">
+                <img style="max-width:400px; max-height:450px" align="middle" type="image/png">
                   <xsl:attribute name="src">
                     <xsl:value-of select="concat('data:',@ct,';base64,',@data)"/>
                   </xsl:attribute>
@@ -150,7 +150,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
               </xsl:if>
 
               <xsl:if test="@seq=0 and @ct='image/heic'">
-                <img width="400" align="middle">
+                <img style="max-width:400px; max-height:450px" align="middle" type="image/jpg">
                   <xsl:attribute name="src">
                     <xsl:value-of select="concat(@cl,'.jpg')"/>
                   </xsl:attribute>
@@ -162,7 +162,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
                   <xsl:attribute name="href">
                     <xsl:value-of select="concat(@cl,'.mp4')"/>
                   </xsl:attribute>
-                  <img width="400" align="middle" type="image/jpg">
+                  <img style="max-width:400px; max-height:450px" align="middle" type="image/jpg">
                     <xsl:attribute name="src">
                       <xsl:value-of select="concat(@cl,'.jpg')"/>
                     </xsl:attribute>
@@ -175,7 +175,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
                   <xsl:attribute name="href">
                     <xsl:value-of select="@cl"/>
                   </xsl:attribute>
-                  <img width="400" align="middle" type="image/jpg">
+                  <img style="max-width:400px; max-height:450px" align="middle" type="image/jpg">
                     <xsl:attribute name="src">
                       <xsl:value-of select="concat(@cl,'.jpg')"/>
                     </xsl:attribute>
@@ -184,7 +184,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
               </xsl:if>
 
               <xsl:if test="@seq=0 and @ct='audio/amr'">
-                <audio width="400" align="middle" type="audio/mpeg">
+                <audio style="max-width:400px; max-height:450px" align="middle" type="audio/mpeg">
                   <xsl:attribute name="src">
                     <xsl:value-of select="concat(@date,'-',@cl,'.mp3')"/>
                   </xsl:attribute>
