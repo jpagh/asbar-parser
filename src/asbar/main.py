@@ -85,35 +85,35 @@ def remove_mms_text(parsed_xml):
         body = sms.get("body")
         if body and body.strip():
             # Normalize text: strip whitespace and normalize line endings
-            normalized_text = ' '.join(body.strip().split())
+            normalized_text = " ".join(body.strip().split())
             sms_texts.add(normalized_text)
 
     for mms in parsed_xml.iter("mms"):
         parts = mms.find("parts")
-        if parts is not None:            # Check if all parts are either SMIL or text content (no media content)
+        if parts is not None:  # Check if all parts are either SMIL or text content (no media content)
             is_text_only = True
             mms_text_content = ""
-            
+
             for part in parts.findall("part"):
                 ct = part.get("ct")
                 text = part.get("text")
-                
+
                 # Check if this part contains text content (but ignore SMIL layout)
                 if text and text.strip() and ct != "application/smil":
                     # This part has actual message text content, so collect it
                     mms_text_content += text.strip() + " "
-                
+
                 # Check for media content types
                 if ct and ct not in ("application/smil", "text/plain", ""):
                     is_text_only = False
-                    break            # If all parts are text-only (SMIL + text), check if there's a matching SMS
+                    break  # If all parts are text-only (SMIL + text), check if there's a matching SMS
             if is_text_only and mms_text_content.strip():
                 # Normalize MMS text the same way as SMS text
-                normalized_mms_text = ' '.join(mms_text_content.strip().split())
-                
+                normalized_mms_text = " ".join(mms_text_content.strip().split())
+
                 # Only remove if there's a matching SMS with the same text content
                 if normalized_mms_text in sms_texts:
-                    mms_to_remove.append(mms)    # Remove collected elements
+                    mms_to_remove.append(mms)  # Remove collected elements
     for mms in mms_to_remove:
         parent = mms.getparent()
         if parent is not None:
@@ -298,22 +298,17 @@ def do_the_things(directory_input: str):
         )
 
         print("", datetime.now().strftime("%H:%M:%S"), "Converting html to pdf")
-        html_to_pdf(directory_output + file + ".html", directory_output + file + ".pdf")  # pdfkit
-        # html_to_pdf(directory_output + file + ".html", directory_output + file + ".pdf") #pdfkit
+        html_to_pdf(directory_output + file + ".html", directory_output + file + ".pdf")
 
         print("", datetime.now().strftime("%H:%M:%S"), "All done")
         print(directory_output, "\n")
 
 
-def start():
+### __main__
+if __name__ == "__main__":
     if len(sys.argv) == 1:
         do_the_things(os.getcwd())
     elif len(sys.argv) != 2:
         print("Usage: asbar [directory_path]")
     else:
         do_the_things(sys.argv[1])
-
-
-### __main__
-if __name__ == "__main__":
-    start()
