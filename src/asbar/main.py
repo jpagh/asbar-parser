@@ -4,9 +4,9 @@ import subprocess
 import sys
 from datetime import datetime
 
+import plutoprint
 from just_heic import convert_file as convert_heic
 from lxml import etree
-from playwright.sync_api import sync_playwright
 
 ### functions: filesystem
 
@@ -244,20 +244,26 @@ def extract_mp4(filename_mp4: str, base64_mp4: str, output_directory: str):
 
 
 def html_to_pdf(html_path, output_path):
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-        page = browser.new_page()
-        page.goto(f"file:///{html_path.replace('\\', '/')}", wait_until="networkidle", timeout=60000)
-        page.pdf(
-            path=output_path,
-            format="Letter",
-            margin={"top": "0.5in", "right": "0.5in", "bottom": "0.5in", "left": "0.5in"},
-            print_background=True,
-            display_header_footer=True,
-            header_template="""<div></div>""",
-            footer_template="""<div style="font-size: 10px; text-align: right; width: 100%; margin-right: 1cm;">pg <span class="pageNumber"></span>/<span class="totalPages"></span></div>""",
-        )
-        browser.close()
+    print("Printing PDF with Plutoprint")
+    book = plutoprint.Book(plutoprint.PAGE_SIZE_LETTER, plutoprint.PAGE_MARGINS_NARROW)
+    book.load_url(f"file:///{html_path.replace('\\', '/')}")
+    book.write_to_pdf(output_path)
+
+
+    # with sync_playwright() as p:
+    #     browser = p.chromium.launch(headless=True)
+    #     page = browser.new_page()
+    #     page.goto(f"file:///{html_path.replace('\\', '/')}", wait_until="networkidle", timeout=60000)
+    #     page.pdf(
+    #         path=output_path,
+    #         format="Letter",
+    #         margin={"top": "0.5in", "right": "0.5in", "bottom": "0.5in", "left": "0.5in"},
+    #         print_background=True,
+    #         display_header_footer=True,
+    #         header_template="""<div></div>""",
+    #         footer_template="""<div style="font-size: 10px; text-align: right; width: 100%; margin-right: 1cm;">pg <span class="pageNumber"></span>/<span class="totalPages"></span></div>""",
+    #     )
+    #     browser.close()
 
 
 ### functions: do the things
