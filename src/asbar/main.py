@@ -175,7 +175,7 @@ def convert_3gp_to_mp4(filename_3gp: str, base64_3gp: str, output_directory: str
     # Convert the .3gp file to .mp4 using ffmpeg
     subprocess.run(
         [
-            r"C:\Program Files\ffmpeg\bin\ffmpeg.exe",
+            "ffmpeg",
             "-nostats",
             "-loglevel",
             "0",
@@ -189,7 +189,7 @@ def convert_3gp_to_mp4(filename_3gp: str, base64_3gp: str, output_directory: str
     # Save a jpg of the first frame using ffmpeg
     subprocess.run(
         [
-            r"C:\Program Files\ffmpeg\bin\ffmpeg.exe",
+            "ffmpeg",
             "-nostats",
             "-loglevel",
             "0",
@@ -222,7 +222,7 @@ def extract_mp4(filename_mp4: str, base64_mp4: str, output_directory: str):
     # Save a jpg of the first frame using ffmpeg
     subprocess.run(
         [
-            r"C:\Program Files\ffmpeg\bin\ffmpeg.exe",
+            "ffmpeg",
             "-nostats",
             "-loglevel",
             "0",

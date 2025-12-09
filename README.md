@@ -5,7 +5,7 @@ Creates a "text message bubble" styled format.
 
 ## Requirements
 
-This module requires `ffmpeg` and expects it to be installed in `"C:\Program Files\ffmpeg\bin\ffmpeg.exe"`.
+This module requires `ffmpeg` to be installed and available in your system's PATH.
 
 ## Usage
 Run `asbar` in the directory that has your Android SMS Backup and Restore `.xml` file(s), or provide the directory path as an argument.
