@@ -1,9 +1,11 @@
 import base64
 import os
 import pathlib
+import re
 import subprocess
 import sys
 from datetime import datetime
+from io import BytesIO
 
 from just_heic import convert_file as convert_heic
 from lxml import etree
@@ -48,12 +50,26 @@ def list_xml_files(directory):
 ######################################################################
 
 
-def parse_huge_xml(xml_path):
-    # Create a custom parser with the Huge option enabled; recover handles invalid characters
-    parser = etree.XMLParser(huge_tree=True, recover=True)
+def _replace_reactions(content: bytes) -> bytes:
+    # Google Messages reaction format in raw XML:
+    # text="\n\x0b{emoji}\x0b to \x1c\n{quoted}\n\x1d\n"  (LF or CRLF line endings)
+    # Replace with a clean single-line string safe for an XML attribute value.
+    pattern = re.compile(rb"\r?\n\x0b(.*?)\x0b to \x1c\r?\n(.*?)\r?\n\x1d\r?\n", re.DOTALL)
 
-    # Parse XML file using the custom parser
-    return etree.parse(xml_path, parser)
+    def replace(m):
+        emoji = m.group(1).decode("utf-8")
+        quoted = m.group(2).decode("utf-8").replace('"', "&quot;")
+        return f'Reacted with {emoji} to &quot;{quoted}&quot;'.encode("utf-8")
+
+    return pattern.sub(replace, content)
+
+
+def parse_huge_xml(xml_path):
+    parser = etree.XMLParser(huge_tree=True)
+    with open(xml_path, "rb") as f:
+        content = f.read()
+    content = _replace_reactions(content)
+    return etree.parse(BytesIO(content), parser)
 
 
 def rename_null_mms_data(parsed_xml):
