@@ -1,5 +1,6 @@
 import base64
 import os
+import pathlib
 import subprocess
 import sys
 from datetime import datetime
@@ -8,7 +9,10 @@ from just_heic import convert_file as convert_heic
 from lxml import etree
 from playwright.sync_api import sync_playwright
 
+
+######################################################################
 ### functions: filesystem
+######################################################################
 
 
 def create_directory(directory_path):
@@ -26,7 +30,7 @@ def script_path():
     script_path = os.path.abspath(__file__)
 
     # Return the directory of the current script
-    return os.path.dirname(script_path) + "\\"
+    return os.path.dirname(script_path)
 
 
 def list_xml_files(directory):
@@ -39,12 +43,14 @@ def list_xml_files(directory):
     return xml_files
 
 
+######################################################################
 ### functions: xml
+######################################################################
 
 
 def parse_huge_xml(xml_path):
-    # Create a custom parser with the Huge option enabled
-    parser = etree.XMLParser(huge_tree=True)
+    # Create a custom parser with the Huge option enabled; recover handles invalid characters
+    parser = etree.XMLParser(huge_tree=True, recover=True)
 
     # Parse XML file using the custom parser
     return etree.parse(xml_path, parser)
@@ -90,7 +96,9 @@ def remove_mms_text(parsed_xml):
 
     for mms in parsed_xml.iter("mms"):
         parts = mms.find("parts")
-        if parts is not None:  # Check if all parts are either SMIL or text content (no media content)
+        if (
+            parts is not None
+        ):  # Check if all parts are either SMIL or text content (no media content)
             is_text_only = True
             mms_text_content = ""
 
@@ -146,7 +154,9 @@ def get_mms_data_from_xml(parsed_xml, content_type: str):
             yield (part.get("cl"), part.get("data"))
 
 
+######################################################################
 ### functions: heic
+######################################################################
 
 
 def convert_heic_to_jpg(filename_heic: str, base64_heic: str, output_directory: str):
@@ -160,7 +170,9 @@ def convert_heic_to_jpg(filename_heic: str, base64_heic: str, output_directory: 
     convert_heic(filepath_heic, filepath_jpg)
 
 
+######################################################################
 ### functions: videos
+######################################################################
 
 
 def convert_3gp_to_mp4(filename_3gp: str, base64_3gp: str, output_directory: str):
@@ -207,7 +219,11 @@ def convert_3gp_to_mp4(filename_3gp: str, base64_3gp: str, output_directory: str
     )
 
     # Remove the .3gp file
-    if os.path.isfile(filepath_3gp) and os.path.isfile(filepath_mp4) and os.path.isfile(filepath_image):
+    if (
+        os.path.isfile(filepath_3gp)
+        and os.path.isfile(filepath_mp4)
+        and os.path.isfile(filepath_image)
+    ):
         os.remove(filepath_3gp)
 
 
@@ -240,18 +256,27 @@ def extract_mp4(filename_mp4: str, base64_mp4: str, output_directory: str):
     )
 
 
+######################################################################
 ### functions: pdf
+######################################################################
 
 
 def html_to_pdf(html_path, output_path):
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()
-        page.goto(f"file:///{html_path.replace('\\', '/')}", wait_until="networkidle", timeout=60000)
+        page.goto(
+            pathlib.Path(html_path).as_uri(), wait_until="networkidle", timeout=60000
+        )
         page.pdf(
             path=output_path,
             format="Letter",
-            margin={"top": "0.5in", "right": "0.5in", "bottom": "0.5in", "left": "0.5in"},
+            margin={
+                "top": "0.5in",
+                "right": "0.5in",
+                "bottom": "0.5in",
+                "left": "0.5in",
+            },
             print_background=True,
             display_header_footer=True,
             header_template="""<div></div>""",
@@ -260,7 +285,9 @@ def html_to_pdf(html_path, output_path):
         browser.close()
 
 
+######################################################################
 ### functions: do the things
+######################################################################
 
 
 def do_the_things(directory_input: str):
@@ -269,12 +296,14 @@ def do_the_things(directory_input: str):
     print()
 
     for file in xml_files:
-        directory_output = create_directory(directory_input + "\\Text Messages\\" + file + "\\")
+        directory_output = create_directory(
+            os.path.join(directory_input, "Text Messages", file)
+        )
 
-        print(directory_input + "\\" + file + ".xml")
+        print(os.path.join(directory_input, file + ".xml"))
 
         print("", datetime.now().strftime("%H:%M:%S"), "Parsing file")
-        xml = parse_huge_xml(directory_input + "\\" + file + ".xml")
+        xml = parse_huge_xml(os.path.join(directory_input, file + ".xml"))
         xml = remove_mms_text(xml)
         xml = rename_null_mms_data(xml)
 
@@ -293,12 +322,15 @@ def do_the_things(directory_input: str):
         print("", datetime.now().strftime("%H:%M:%S"), "Converting xml to html")
         transform(
             xml,
-            script_path() + "__assets__/asbar.xslt",
-            directory_output + file + ".html",
+            os.path.join(script_path(), "__assets__", "asbar.xslt"),
+            os.path.join(directory_output, file + ".html"),
         )
 
         print("", datetime.now().strftime("%H:%M:%S"), "Converting html to pdf")
-        html_to_pdf(directory_output + file + ".html", directory_output + file + ".pdf")
+        html_to_pdf(
+            os.path.join(directory_output, file + ".html"),
+            os.path.join(directory_output, file + ".pdf"),
+        )
 
         print("", datetime.now().strftime("%H:%M:%S"), "All done")
         print(directory_output, "\n")
@@ -313,6 +345,10 @@ def start():
         do_the_things(sys.argv[1])
 
 
+######################################################################
 ### __main__
+######################################################################
+
+
 if __name__ == "__main__":
     start()
