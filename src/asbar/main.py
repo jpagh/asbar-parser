@@ -54,12 +54,14 @@ def _replace_reactions(content: bytes) -> bytes:
     # Google Messages reaction format in raw XML:
     # text="\n\x0b{emoji}\x0b to \x1c\n{quoted}\n\x1d\n"  (LF or CRLF line endings)
     # Replace with a clean single-line string safe for an XML attribute value.
-    pattern = re.compile(rb"\r?\n\x0b(.*?)\x0b to \x1c\r?\n(.*?)\r?\n\x1d\r?\n", re.DOTALL)
+    pattern = re.compile(
+        rb"\r?\n\x0b(.*?)\x0b to \x1c\r?\n(.*?)\r?\n\x1d\r?\n", re.DOTALL
+    )
 
     def replace(m):
         emoji = m.group(1).decode("utf-8")
         quoted = m.group(2).decode("utf-8").replace('"', "&quot;")
-        return f'Reacted with {emoji} to &quot;{quoted}&quot;'.encode("utf-8")
+        return f"Reacted with {emoji} to &quot;{quoted}&quot;".encode("utf-8")
 
     return pattern.sub(replace, content)
 
@@ -278,14 +280,15 @@ def extract_mp4(filename_mp4: str, base64_mp4: str, output_directory: str):
 
 
 def html_to_pdf(html_path, output_path):
+    html_file = pathlib.Path(html_path).resolve()
+    output_file = pathlib.Path(output_path).resolve()
+
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()
-        page.goto(
-            pathlib.Path(html_path).as_uri(), wait_until="networkidle", timeout=60000
-        )
+        page.goto(html_file.as_uri(), wait_until="networkidle", timeout=60000)
         page.pdf(
-            path=output_path,
+            path=str(output_file),
             format="Letter",
             margin={
                 "top": "0.5in",
@@ -307,6 +310,7 @@ def html_to_pdf(html_path, output_path):
 
 
 def do_the_things(directory_input: str):
+    directory_input = os.path.abspath(directory_input)
     xml_files = list_xml_files(directory_input)
 
     print()
