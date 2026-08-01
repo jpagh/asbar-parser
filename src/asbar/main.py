@@ -11,7 +11,6 @@ from just_heic import convert_file as convert_heic
 from lxml import etree
 from playwright.sync_api import sync_playwright
 
-
 ######################################################################
 ### functions: filesystem
 ######################################################################
@@ -61,7 +60,7 @@ def _replace_reactions(content: bytes) -> bytes:
     def replace(m):
         emoji = m.group(1).decode("utf-8")
         quoted = m.group(2).decode("utf-8").replace('"', "&quot;")
-        return f"Reacted with {emoji} to &quot;{quoted}&quot;".encode("utf-8")
+        return f"Reacted with {emoji} to &quot;{quoted}&quot;".encode()
 
     return pattern.sub(replace, content)
 
@@ -279,11 +278,24 @@ def extract_mp4(filename_mp4: str, base64_mp4: str, output_directory: str):
 ######################################################################
 
 
+def install_browsers():
+    subprocess.run(
+        [sys.executable, "-m", "playwright", "install", "chromium"],
+        check=True,
+    )
+
+
 def html_to_pdf(html_path, output_path):
     html_file = pathlib.Path(html_path).resolve()
     output_file = pathlib.Path(output_path).resolve()
 
     with sync_playwright() as p:
+        if not pathlib.Path(p.chromium.executable_path).is_file():
+            raise SystemExit(
+                "Playwright Chromium is not installed. "
+                "Run `asbar install-browsers` first."
+            )
+
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()
         page.goto(html_file.as_uri(), wait_until="networkidle", timeout=60000)
@@ -361,6 +373,9 @@ def start():
         do_the_things(os.getcwd())
     elif len(sys.argv) != 2:
         print("Usage: asbar [directory_path]")
+        print("       asbar install-browsers")
+    elif sys.argv[1] == "install-browsers":
+        install_browsers()
     else:
         do_the_things(sys.argv[1])
 

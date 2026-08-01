@@ -6,6 +6,17 @@ Creates a "text message bubble" styled format.
 ## Requirements
 
 This module requires `ffmpeg` to be installed and available in your system's PATH.
+Playwright's Chromium browser must also be installed before generating PDFs.
+
+```bash
+asbar install-browsers
+```
+
+If running the package directly with `uv`, use:
+
+```bash
+uv tool run --from asbar-parser asbar install-browsers
+```
 
 ## Usage
 Run `asbar` in the directory that has your Android SMS Backup and Restore `.xml` file(s), or provide the directory path as an argument.
