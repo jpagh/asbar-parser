@@ -1,6 +1,6 @@
 [project]
     name            = "asbar-parser"
-    version         = "26.8.1"
+    version         = "26.8.2"
     description     = "Parses Android SMS Backup and Restore .xml files to extract media and format the text messages."
     readme          = "README.md"
     requires-python = ">=3.14"
