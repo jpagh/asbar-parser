@@ -285,6 +285,49 @@ def install_browsers():
     )
 
 
+def compress_pdf(input_path, output_path):
+    # Re-distill the PDF with Ghostscript's pdfwrite device, which downsamples
+    # embedded images and re-encodes them as JPEG, like Acrobat's "Compress PDF"
+    # action (/ebook = 150 dpi images, medium JPEG quality). Text stays vector.
+    try:
+        subprocess.run(
+            [
+                "gs",
+                "-q",
+                "-dNOPAUSE",
+                "-dBATCH",
+                "-sDEVICE=pdfwrite",
+                "-dCompatibilityLevel=1.5",
+                "-dPDFSETTINGS=/ebook",
+                "-sOutputFile=" + output_path,
+                input_path,
+            ],
+            check=True,
+        )
+    except FileNotFoundError:
+        print(
+            "    Ghostscript is not installed; skipping PDF compression. "
+            "Install it with `brew install ghostscript`."
+        )
+        return False
+    except subprocess.CalledProcessError:
+        print("    Ghostscript failed; skipping PDF compression.")
+        if os.path.isfile(output_path):
+            os.remove(output_path)
+        return False
+
+    # Keep the original when compression doesn't actually shrink the file
+    if not os.path.isfile(output_path) or os.path.getsize(
+        output_path
+    ) >= os.path.getsize(input_path):
+        print("    Compression did not reduce the file size; keeping the original.")
+        if os.path.isfile(output_path):
+            os.remove(output_path)
+        return False
+
+    return True
+
+
 def html_to_pdf(html_path, output_path):
     html_file = pathlib.Path(html_path).resolve()
     output_file = pathlib.Path(output_path).resolve()
@@ -362,6 +405,12 @@ def do_the_things(directory_input: str):
         html_to_pdf(
             os.path.join(directory_output, file + ".html"),
             os.path.join(directory_output, file + ".pdf"),
+        )
+
+        print("", datetime.now().strftime("%H:%M:%S"), "Compressing pdf")
+        compress_pdf(
+            os.path.join(directory_output, file + ".pdf"),
+            os.path.join(directory_output, file + "-compressed.pdf"),
         )
 
         print("", datetime.now().strftime("%H:%M:%S"), "All done")
