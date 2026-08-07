@@ -17,7 +17,7 @@ wheels = [
 
 [[package]]
 name = "asbar-parser"
-version = "26.8.0"
+version = "26.8.1"
 source = { editable = "." }
 dependencies = [
     { name = "arrow" },
