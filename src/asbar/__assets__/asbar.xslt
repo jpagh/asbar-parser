@@ -152,7 +152,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
               <xsl:if test="@seq=0 and @ct='image/heic'">
                 <img style="max-width:400px; max-height:450px" align="middle" type="image/jpg">
                   <xsl:attribute name="src">
-                    <xsl:value-of select="concat(@cl,'.jpg')"/>
+                    <xsl:value-of select="concat('media/',@cl,'.jpg')"/>
                   </xsl:attribute>
                 </img>
               </xsl:if>
@@ -160,11 +160,11 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
               <xsl:if test="@seq=0 and @ct='video/3gpp'">
                 <a>
                   <xsl:attribute name="href">
-                    <xsl:value-of select="concat(@cl,'.mp4')"/>
+                    <xsl:value-of select="concat('media/',@cl,'.mp4')"/>
                   </xsl:attribute>
                   <img style="max-width:400px; max-height:450px" align="middle" type="image/jpg">
                     <xsl:attribute name="src">
-                      <xsl:value-of select="concat(@cl,'.jpg')"/>
+                      <xsl:value-of select="concat('media/',@cl,'.jpg')"/>
                     </xsl:attribute>
                   </img>
                 </a>
@@ -173,11 +173,11 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
               <xsl:if test="@seq=0 and @ct='video/mp4'">
                 <a>
                   <xsl:attribute name="href">
-                    <xsl:value-of select="@cl"/>
+                    <xsl:value-of select="concat('media/',@cl)"/>
                   </xsl:attribute>
                   <img style="max-width:400px; max-height:450px" align="middle" type="image/jpg">
                     <xsl:attribute name="src">
-                      <xsl:value-of select="concat(@cl,'.jpg')"/>
+                      <xsl:value-of select="concat('media/',@cl,'.jpg')"/>
                     </xsl:attribute>
                   </img>
                 </a>

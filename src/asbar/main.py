@@ -177,8 +177,8 @@ def get_mms_data_from_xml(parsed_xml, content_type: str):
 
 
 def convert_heic_to_jpg(filename_heic: str, base64_heic: str, output_directory: str):
-    filepath_heic = output_directory + filename_heic
-    filepath_jpg = output_directory + filename_heic + ".jpg"
+    filepath_heic = os.path.join(output_directory, filename_heic)
+    filepath_jpg = os.path.join(output_directory, filename_heic + ".jpg")
 
     # Decode the base64 .heic file
     with open(filepath_heic, "wb") as f:
@@ -193,9 +193,9 @@ def convert_heic_to_jpg(filename_heic: str, base64_heic: str, output_directory: 
 
 
 def convert_3gp_to_mp4(filename_3gp: str, base64_3gp: str, output_directory: str):
-    filepath_3gp = output_directory + filename_3gp
-    filepath_mp4 = output_directory + filename_3gp + ".mp4"
-    filepath_image = output_directory + filename_3gp + ".jpg"
+    filepath_3gp = os.path.join(output_directory, filename_3gp)
+    filepath_mp4 = os.path.join(output_directory, filename_3gp + ".mp4")
+    filepath_image = os.path.join(output_directory, filename_3gp + ".jpg")
 
     # Decode the base64 .3gp file
     with open(filepath_3gp, "wb") as f:
@@ -245,8 +245,8 @@ def convert_3gp_to_mp4(filename_3gp: str, base64_3gp: str, output_directory: str
 
 
 def extract_mp4(filename_mp4: str, base64_mp4: str, output_directory: str):
-    filepath_mp4 = output_directory + filename_mp4
-    filepath_image = output_directory + filename_mp4 + ".jpg"
+    filepath_mp4 = os.path.join(output_directory, filename_mp4)
+    filepath_image = os.path.join(output_directory, filename_mp4 + ".jpg")
 
     # Decode the base64 .mp4 file
     with open(filepath_mp4, "wb") as f:
@@ -374,6 +374,7 @@ def do_the_things(directory_input: str):
         directory_output = create_directory(
             os.path.join(directory_input, "Text Messages", file)
         )
+        directory_media = create_directory(os.path.join(directory_output, "media"))
 
         print(os.path.join(directory_input, file + ".xml"))
 
@@ -384,15 +385,15 @@ def do_the_things(directory_input: str):
 
         print("", datetime.now().strftime("%H:%M:%S"), "Converting images: heic")
         for content in get_mms_data_from_xml(xml, "image/heic"):
-            convert_heic_to_jpg(*content, directory_output)
+            convert_heic_to_jpg(*content, directory_media)
 
         print("", datetime.now().strftime("%H:%M:%S"), "Converting videos: 3gp")
         for content in get_mms_data_from_xml(xml, "video/3gpp"):
-            convert_3gp_to_mp4(*content, directory_output)
+            convert_3gp_to_mp4(*content, directory_media)
 
         print("", datetime.now().strftime("%H:%M:%S"), "Extracting videos: mp4")
         for content in get_mms_data_from_xml(xml, "video/mp4"):
-            extract_mp4(*content, directory_output)
+            extract_mp4(*content, directory_media)
 
         print("", datetime.now().strftime("%H:%M:%S"), "Converting xml to html")
         transform(
