@@ -34,3 +34,36 @@ Run `asbar` in the directory that has your Android SMS Backup and Restore `.xml`
 ```bash
 asbar "input/directory"
 ```
+
+Images are extracted into the output `media/` directory twice: the original
+asset is preserved, while a resized/compressed derivative is used by the HTML
+and PDF. For example, an image may produce `*-original.png` and
+`*-compressed.jpg`. PDF compression runs through Ghostscript by default. To
+generate the regular PDF without spending time creating the optional
+compressed copy, use:
+
+```bash
+asbar --no-compress "input/directory"
+```
+
+## Generate test data
+
+A dependency-free fixture generator is included for creating a small Android
+SMS Backup and Restore-compatible XML file. It uses reserved `555` phone
+numbers, deterministic lorem ipsum-style messages, and embedded PNG MMS
+images:
+
+```bash
+python scripts/generate_fake_chats.py --output fake-chats.xml
+asbar --no-compress .
+```
+
+The generator accepts `--conversations`, `--messages`, `--images`,
+`--image-width`, `--image-height`, and `--seed` options. It creates four
+640x400 images per conversation by default; use `--images 10` to attach an
+image to every message in a ten-message conversation. For example,
+`--conversations 3 --messages 25 --images 8 --image-width 1200 --image-height 800 --seed 7`
+creates a larger, repeatable fixture. The seed affects message text and image
+colors, not the number or dimensions of images. PNG images are embedded in the
+XML, so no media files need to be prepared separately. The parser preserves
+each original image next to its `-compressed` presentation copy.

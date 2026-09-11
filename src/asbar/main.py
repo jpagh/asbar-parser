@@ -7,9 +7,10 @@ import sys
 from datetime import datetime
 from io import BytesIO
 
-from just_heic import convert_file as convert_heic
-from lxml import etree
+import lxml.etree as etree
 from playwright.sync_api import sync_playwright
+
+from asbar.media import prepare_image_parts, prepare_video_thumbnails
 
 ######################################################################
 ### functions: filesystem
@@ -169,22 +170,6 @@ def get_mms_data_from_xml(parsed_xml, content_type: str):
         if part.get("ct") == content_type:
             # Return the "cl" (filename) and "data" attributes as a tuple
             yield (part.get("cl"), part.get("data"))
-
-
-######################################################################
-### functions: heic
-######################################################################
-
-
-def convert_heic_to_jpg(filename_heic: str, base64_heic: str, output_directory: str):
-    filepath_heic = os.path.join(output_directory, filename_heic)
-    filepath_jpg = os.path.join(output_directory, filename_heic + ".jpg")
-
-    # Decode the base64 .heic file
-    with open(filepath_heic, "wb") as f:
-        f.write(base64.b64decode(base64_heic))
-
-    convert_heic(filepath_heic, filepath_jpg)
 
 
 ######################################################################
@@ -364,7 +349,7 @@ def html_to_pdf(html_path, output_path):
 ######################################################################
 
 
-def do_the_things(directory_input: str):
+def do_the_things(directory_input: str, compress_pdfs: bool = True):
     directory_input = os.path.abspath(directory_input)
     xml_files = list_xml_files(directory_input)
 
@@ -383,9 +368,12 @@ def do_the_things(directory_input: str):
         xml = remove_mms_text(xml)
         xml = rename_null_mms_data(xml)
 
-        print("", datetime.now().strftime("%H:%M:%S"), "Converting images: heic")
-        for content in get_mms_data_from_xml(xml, "image/heic"):
-            convert_heic_to_jpg(*content, directory_media)
+        print(
+            "",
+            datetime.now().strftime("%H:%M:%S"),
+            "Extracting original and compressed images",
+        )
+        prepare_image_parts(xml, directory_media)
 
         print("", datetime.now().strftime("%H:%M:%S"), "Converting videos: 3gp")
         for content in get_mms_data_from_xml(xml, "video/3gpp"):
@@ -394,6 +382,13 @@ def do_the_things(directory_input: str):
         print("", datetime.now().strftime("%H:%M:%S"), "Extracting videos: mp4")
         for content in get_mms_data_from_xml(xml, "video/mp4"):
             extract_mp4(*content, directory_media)
+
+        print(
+            "",
+            datetime.now().strftime("%H:%M:%S"),
+            "Compressing video thumbnails",
+        )
+        prepare_video_thumbnails(xml, directory_media)
 
         print("", datetime.now().strftime("%H:%M:%S"), "Converting xml to html")
         transform(
@@ -408,26 +403,37 @@ def do_the_things(directory_input: str):
             os.path.join(directory_output, file + ".pdf"),
         )
 
-        print("", datetime.now().strftime("%H:%M:%S"), "Compressing pdf")
-        compress_pdf(
-            os.path.join(directory_output, file + ".pdf"),
-            os.path.join(directory_output, file + "-compressed.pdf"),
-        )
+        if compress_pdfs:
+            print("", datetime.now().strftime("%H:%M:%S"), "Compressing pdf")
+            compress_pdf(
+                os.path.join(directory_output, file + ".pdf"),
+                os.path.join(directory_output, file + "-compressed.pdf"),
+            )
+        else:
+            print(
+                "",
+                datetime.now().strftime("%H:%M:%S"),
+                "Skipping pdf compression (--no-compress)",
+            )
 
         print("", datetime.now().strftime("%H:%M:%S"), "All done")
         print(directory_output, "\n")
 
 
 def start():
-    if len(sys.argv) == 1:
-        do_the_things(os.getcwd())
-    elif len(sys.argv) != 2:
-        print("Usage: asbar [directory_path]")
+    arguments = sys.argv[1:]
+    no_compress = "--no-compress" in arguments
+    arguments = [argument for argument in arguments if argument != "--no-compress"]
+
+    if len(arguments) == 0:
+        do_the_things(os.getcwd(), compress_pdfs=not no_compress)
+    elif len(arguments) != 1:
+        print("Usage: asbar [--no-compress] [directory_path]")
         print("       asbar install-browsers")
-    elif sys.argv[1] == "install-browsers":
+    elif arguments[0] == "install-browsers":
         install_browsers()
     else:
-        do_the_things(sys.argv[1])
+        do_the_things(arguments[0], compress_pdfs=not no_compress)
 
 
 ######################################################################

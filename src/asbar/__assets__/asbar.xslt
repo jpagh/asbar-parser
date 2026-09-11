@@ -133,26 +133,10 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
             <xsl:for-each select="parts/part">
 
-              <xsl:if test="@seq=0 and @ct='image/jpeg'">
-                <img style="max-width:400px; max-height:450px" align="middle" type="image/jpg">
+              <xsl:if test="starts-with(@ct, 'image/') and @asbar_compressed_filename">
+                <img style="max-width:400px; max-height:450px" align="middle">
                   <xsl:attribute name="src">
-                    <xsl:value-of select="concat('data:',@ct,';base64,',@data)"/>
-                  </xsl:attribute>
-                </img>
-              </xsl:if>
-
-              <xsl:if test="@seq=0 and @ct='image/png'">
-                <img style="max-width:400px; max-height:450px" align="middle" type="image/png">
-                  <xsl:attribute name="src">
-                    <xsl:value-of select="concat('data:',@ct,';base64,',@data)"/>
-                  </xsl:attribute>
-                </img>
-              </xsl:if>
-
-              <xsl:if test="@seq=0 and @ct='image/heic'">
-                <img style="max-width:400px; max-height:450px" align="middle" type="image/jpg">
-                  <xsl:attribute name="src">
-                    <xsl:value-of select="concat('media/',@cl,'.jpg')"/>
+                    <xsl:value-of select="concat('media/',@asbar_compressed_filename)"/>
                   </xsl:attribute>
                 </img>
               </xsl:if>
@@ -164,7 +148,14 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
                   </xsl:attribute>
                   <img style="max-width:400px; max-height:450px" align="middle" type="image/jpg">
                     <xsl:attribute name="src">
-                      <xsl:value-of select="concat('media/',@cl,'.jpg')"/>
+                      <xsl:choose>
+                        <xsl:when test="@asbar_compressed_filename">
+                          <xsl:value-of select="concat('media/',@asbar_compressed_filename)"/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                          <xsl:value-of select="concat('media/',@cl,'.jpg')"/>
+                        </xsl:otherwise>
+                      </xsl:choose>
                     </xsl:attribute>
                   </img>
                 </a>
@@ -177,7 +168,14 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
                   </xsl:attribute>
                   <img style="max-width:400px; max-height:450px" align="middle" type="image/jpg">
                     <xsl:attribute name="src">
-                      <xsl:value-of select="concat('media/',@cl,'.jpg')"/>
+                      <xsl:choose>
+                        <xsl:when test="@asbar_compressed_filename">
+                          <xsl:value-of select="concat('media/',@asbar_compressed_filename)"/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                          <xsl:value-of select="concat('media/',@cl,'.jpg')"/>
+                        </xsl:otherwise>
+                      </xsl:choose>
                     </xsl:attribute>
                   </img>
                 </a>
@@ -191,7 +189,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
                 </audio>
               </xsl:if>
 
-              <xsl:if test="@seq=0 and @ct='text/plain'">
+              <xsl:if test="@ct='text/plain'">
                 <xsl:value-of select="@text"/>
               </xsl:if>
 
