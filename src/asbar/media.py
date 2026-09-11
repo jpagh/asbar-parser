@@ -12,8 +12,8 @@ from typing import Any, cast
 from just_heic import convert_file as convert_heic
 from PIL import Image, ImageOps
 
-DEFAULT_IMAGE_MAX_DIMENSION = 1600
-DEFAULT_JPEG_QUALITY = 85
+DEFAULT_IMAGE_MAX_DIMENSION = 800
+DEFAULT_JPEG_QUALITY = 75
 
 
 @dataclass(frozen=True, slots=True)

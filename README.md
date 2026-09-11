@@ -27,7 +27,8 @@ asbar "input/directory"
 
 Images are extracted into the output `media/` directory twice: the original
 asset is preserved, while a resized/compressed derivative is used by the HTML
-and PDF. For example, an image may produce `*-original.png` and
+and PDF. Derivatives default to a maximum dimension of 800 pixels and JPEG
+quality 75. For example, an image may produce `*-original.png` and
 `*-compressed.jpg`. PDF-level Ghostscript compression is no longer performed;
 the previously supported `--no-compress` flag is accepted for compatibility but
 is no longer needed.

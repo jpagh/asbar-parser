@@ -68,9 +68,7 @@ class MediaPreparationTests(unittest.TestCase):
             ]
         )
 
-        assets = prepare_image_parts(
-            parsed_xml, self.media_directory, max_dimension=1600, jpeg_quality=80
-        )
+        assets = prepare_image_parts(parsed_xml, self.media_directory)
 
         self.assertEqual(len(assets), 2)
         parts = list(parsed_xml.iter("part"))
@@ -95,7 +93,7 @@ class MediaPreparationTests(unittest.TestCase):
         self.assertEqual(compressed_path.suffix, ".jpg")
         self.assertLess(compressed_path.stat().st_size, original_path.stat().st_size)
         with Image.open(compressed_path) as compressed:
-            self.assertEqual(compressed.size, (1600, 800))
+            self.assertEqual(compressed.size, (800, 400))
 
         transparent_path = self.media_directory / assets[1].compressed_filename
         self.assertEqual(transparent_path.suffix, ".png")
@@ -152,7 +150,7 @@ class MediaPreparationTests(unittest.TestCase):
             part.get("asbar_compressed_filename"), assets[0].compressed_filename
         )
         with Image.open(compressed_path) as compressed:
-            self.assertEqual(compressed.size, (1600, 900))
+            self.assertEqual(compressed.size, (800, 450))
 
 
 if __name__ == "__main__":
