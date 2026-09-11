@@ -8,16 +8,6 @@ Creates a "text message bubble" styled format.
 This module requires `ffmpeg` to be installed and available in your system's PATH.
 Playwright's Chromium browser must also be installed before generating PDFs.
 
-`ghostscript` (`gs`) is optional: when available, a second
-`<name>-compressed.pdf` is also generated next to each PDF, with embedded
-images downsampled and re-encoded (150 dpi, medium JPEG quality) like
-Acrobat's "Compress PDF" action. Without it, the full-size PDF is still
-produced and compression is skipped with a notice.
-
-```bash
-brew install ghostscript
-```
-
 ```bash
 asbar install-browsers
 ```
@@ -38,13 +28,9 @@ asbar "input/directory"
 Images are extracted into the output `media/` directory twice: the original
 asset is preserved, while a resized/compressed derivative is used by the HTML
 and PDF. For example, an image may produce `*-original.png` and
-`*-compressed.jpg`. PDF compression runs through Ghostscript by default. To
-generate the regular PDF without spending time creating the optional
-compressed copy, use:
-
-```bash
-asbar --no-compress "input/directory"
-```
+`*-compressed.jpg`. PDF-level Ghostscript compression is no longer performed;
+the previously supported `--no-compress` flag is accepted for compatibility but
+is no longer needed.
 
 ## Generate test data
 
@@ -55,7 +41,7 @@ images:
 
 ```bash
 python scripts/generate_fake_chats.py --output fake-chats.xml
-asbar --no-compress .
+asbar .
 ```
 
 The generator accepts `--conversations`, `--messages`, `--images`,
